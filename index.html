@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checklist Servis Berkala</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" />
+    <style>
+      @media print {
+        .no-print {
+          display: none;
+        }
+        .print-only {
+          display: block;
+        }
+        .print-break {
+          page-break-before: always;
+        }
+      }
+      .print-only {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-4">
+    <div class="max-w-3xl mx-auto bg-white shadow rounded-lg p-6">
+      <!-- Input Form -->
+      <div class="no-print">
+        <h1 class="text-2xl font-bold mb-4">Checklist Servis Berkala</h1>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <input type="text" id="plateNumber" placeholder="Nomor Polisi" class="border p-2 rounded" />
+          <input type="date" id="serviceDate" class="border p-2 rounded" />
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <button onclick="addTaskGroup('pre-check')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">+ Pre-Check</button>
+          <button onclick="addTaskGroup('torque')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">+ Torsi</button>
+          <button onclick="addTaskGroup('safety')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">+ Safety</button>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="customTask" placeholder="Task krusial lainnya..." class="border p-2 rounded flex-1" />
+          <button onclick="addCustomTask()" class="bg-green-500 text-white px-4 rounded hover:bg-green-600">+</button>
+        </div>
+
+        <div id="taskList" class="space-y-2 mb-4"></div>
+
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 flex-1">Cetak PDF</button>
+        </div>
+      </div>
+
+      <!-- Print Version -->
+      <div class="print-only" id="printVersion">
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-bold">Laporan Servis Berkala</h1>
+          <p class="mt-2" id="printPlateNumber"></p>
+          <p id="printDate"></p>
+        </div>
+
+        <div id="printTaskList"></div>
+
+        <div class="mt-16 flex justify-between">
+          <div class="text-center">
+            <p>Mekanik</p>
+            <div class="mt-16 border-t border-black w-32">(________________)</div>
+          </div>
+          <div class="text-center">
+            <p>Customer</p>
+            <div class="mt-16 border-t border-black w-32">(________________)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const criticalTasks = {
+        'pre-check': [
+          {
+            id: 'pre-1',
+            task: 'Cek semua lampu (sein, rem, head lamp)',
+            why: 'Sering terlewat di awal servis',
+          },
+          {
+            id: 'pre-2',
+            task: 'Cek indikator warning di panel',
+            why: 'Indikasi masalah serius',
+          },
+        ],
+        torque: [
+          {
+            id: 'torque-1',
+            task: 'Torsi baut drain oli',
+            spec: '25-30 Nm',
+            why: 'Kebocoran oli berbahaya',
+          },
+          {
+            id: 'torque-2',
+            task: 'Torsi baut roda',
+            spec: '80-100 Nm',
+            why: 'Roda longgar sangat berbahaya',
+          },
+          {
+            id: 'torque-3',
+            task: 'Torsi caliper rem',
+            spec: '35-40 Nm',
+            why: 'Kinerja pengereman',
+          },
+        ],
+        safety: [
+          {
+            id: 'safety-1',
+            task: 'Cek kondisi pad rem',
+            why: 'Keselamatan berkendara',
+          },
+          {
+            id: 'safety-2',
+            task: 'Cek kondisi ban',
+            why: 'Periksa kerusakan',
+          },
+        ],
+      };
+
+      let activeTasks = [];
+
+      function addTaskGroup(category) {
+        const tasks = criticalTasks[category];
+        tasks.forEach((task) => {
+          if (!activeTasks.some((t) => t.id === task.id)) {
+            activeTasks.push({ ...task, completed: false, category });
+          }
+        });
+        renderTasks();
+      }
+
+      function addCustomTask() {
+        const input = document.getElementById('customTask');
+        const task = input.value.trim();
+        if (task) {
+          activeTasks.push({
+            id: `custom-${Date.now()}`,
+            task: task,
+            completed: false,
+            category: 'custom',
+          });
+          input.value = '';
+          renderTasks();
+        }
+      }
+
+      function toggleTask(id) {
+        const task = activeTasks.find((t) => t.id === id);
+        if (task) {
+          task.completed = !task.completed;
+          renderTasks();
+        }
+      }
+
+      function renderTasks() {
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = '';
+
+        activeTasks.forEach((task) => {
+          const taskElement = document.createElement('div');
+          taskElement.className = 'border p-3 rounded';
+          taskElement.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" 
+                            ${task.completed ? 'checked' : ''} 
+                            onchange="toggleTask('${task.id}')"
+                            class="w-4 h-4">
+                        <div class="flex-1">
+                            <p class="${task.completed ? 'line-through' : ''}">${task.task}</p>
+                            ${task.spec ? `<p class="text-sm text-blue-600">Spesifikasi: ${task.spec}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+          taskList.appendChild(taskElement);
+        });
+
+        updatePrintVersion();
+      }
+
+      function updatePrintVersion() {
+        const plateNumber = document.getElementById('plateNumber').value;
+        const date = document.getElementById('serviceDate').value;
+
+        document.getElementById('printPlateNumber').textContent = `Nomor Polisi: ${plateNumber}`;
+        document.getElementById('printDate').textContent = `Tanggal: ${new Date(date).toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}`;
+
+        const printTaskList = document.getElementById('printTaskList');
+        printTaskList.innerHTML = '';
+
+        // Group tasks by category
+        const groupedTasks = {};
+        activeTasks.forEach((task) => {
+          if (!groupedTasks[task.category]) {
+            groupedTasks[task.category] = [];
+          }
+          groupedTasks[task.category].push(task);
+        });
+
+        // Render each category
+        for (const [category, tasks] of Object.entries(groupedTasks)) {
+          const categoryElement = document.createElement('div');
+          categoryElement.className = 'mb-4';
+          categoryElement.innerHTML = `
+                    <h3 class="font-bold mb-2 capitalize">${category.replace('-', ' ')}</h3>
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="border p-2 text-left">Task</th>
+                                <th class="border p-2 text-center w-24">Status</th>
+                                <th class="border p-2 text-left">Spesifikasi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tasks
+                              .map(
+                                (task) => `
+                                <tr>
+                                    <td class="border p-2">${task.task}</td>
+                                    <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
+                                    <td class="border p-2">${task.spec || '-'}</td>
+                                </tr>
+                            `
+                              )
+                              .join('')}
+                        </tbody>
+                    </table>
+                `;
+          printTaskList.appendChild(categoryElement);
+        }
+      }
+
+      // Set default date
+      document.getElementById('serviceDate').valueAsDate = new Date();
+    </script>
+  </body>
+</html>
