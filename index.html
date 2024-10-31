@@ -7,24 +7,43 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" />
     <style>
       @media print {
+        body {
+          background: white;
+          padding: 20px;
+        }
         .no-print {
-          display: none;
+          display: none !important;
         }
-        .print-only {
-          display: block;
+        .print-view {
+          display: block !important;
+          page-break-inside: avoid;
         }
-        .print-break {
-          page-break-before: always;
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-bottom: 20px;
+        }
+        th,
+        td {
+          border: 1px solid #000;
+          padding: 8px;
+          text-align: left;
+        }
+        .sign-area {
+          margin-top: 50px;
+          display: flex;
+          justify-content: space-between;
+          page-break-inside: avoid;
         }
       }
-      .print-only {
+      .print-view {
         display: none;
       }
     </style>
   </head>
-  <body class="bg-gray-100 p-4">
+  <body>
+    <!-- Form Input -->
     <div class="max-w-3xl mx-auto bg-white shadow rounded-lg p-6">
-      <!-- Input Form -->
       <div class="no-print">
         <h1 class="text-2xl font-bold mb-4">Checklist Servis Berkala</h1>
 
@@ -46,29 +65,27 @@
 
         <div id="taskList" class="space-y-2 mb-4"></div>
 
-        <div class="flex gap-2">
-          <button onclick="window.print()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 flex-1">Cetak PDF</button>
-        </div>
+        <button onclick="preparePrint()" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 w-full">Cetak PDF</button>
       </div>
 
       <!-- Print Version -->
-      <div class="print-only" id="printVersion">
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-bold">Laporan Servis Berkala</h1>
-          <p class="mt-2" id="printPlateNumber"></p>
-          <p id="printDate"></p>
+      <div class="print-view">
+        <div style="text-align: center; margin-bottom: 30px">
+          <h1 style="font-size: 24px; font-weight: bold">Laporan Servis Berkala</h1>
+          <p style="margin-top: 10px" id="print-plate"></p>
+          <p id="print-date"></p>
         </div>
 
-        <div id="printTaskList"></div>
+        <div id="print-content"></div>
 
-        <div class="mt-16 flex justify-between">
-          <div class="text-center">
+        <div class="sign-area">
+          <div style="text-align: center">
             <p>Mekanik</p>
-            <div class="mt-16 border-t border-black w-32">(________________)</div>
+            <div style="margin-top: 60px; border-top: 1px solid black; width: 150px">(_______________)</div>
           </div>
-          <div class="text-center">
+          <div style="text-align: center">
             <p>Customer</p>
-            <div class="mt-16 border-t border-black w-32">(________________)</div>
+            <div style="margin-top: 60px; border-top: 1px solid black; width: 150px">(_______________)</div>
           </div>
         </div>
       </div>
@@ -178,24 +195,23 @@
                 `;
           taskList.appendChild(taskElement);
         });
-
-        updatePrintVersion();
       }
 
-      function updatePrintVersion() {
-        const plateNumber = document.getElementById('plateNumber').value;
-        const date = document.getElementById('serviceDate').value;
+      function preparePrint() {
+        // Update print version info
+        document.getElementById('print-plate').textContent = 'Nomor Polisi: ' + document.getElementById('plateNumber').value;
 
-        document.getElementById('printPlateNumber').textContent = `Nomor Polisi: ${plateNumber}`;
-        document.getElementById('printDate').textContent = `Tanggal: ${new Date(date).toLocaleDateString('id-ID', {
+        const date = new Date(document.getElementById('serviceDate').value).toLocaleDateString('id-ID', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric',
-        })}`;
+        });
+        document.getElementById('print-date').textContent = 'Tanggal: ' + date;
 
-        const printTaskList = document.getElementById('printTaskList');
-        printTaskList.innerHTML = '';
+        // Generate print content
+        const printContent = document.getElementById('print-content');
+        printContent.innerHTML = '';
 
         // Group tasks by category
         const groupedTasks = {};
@@ -206,37 +222,49 @@
           groupedTasks[task.category].push(task);
         });
 
-        // Render each category
-        for (const [category, tasks] of Object.entries(groupedTasks)) {
-          const categoryElement = document.createElement('div');
-          categoryElement.className = 'mb-4';
-          categoryElement.innerHTML = `
-                    <h3 class="font-bold mb-2 capitalize">${category.replace('-', ' ')}</h3>
-                    <table class="w-full border-collapse">
-                        <thead>
+        // Create tables for each category
+        Object.entries(groupedTasks).forEach(([category, tasks]) => {
+          const categoryTitle = document.createElement('h3');
+          categoryTitle.style.fontWeight = 'bold';
+          categoryTitle.style.marginTop = '20px';
+          categoryTitle.style.marginBottom = '10px';
+          categoryTitle.textContent = category.replace('-', ' ').toUpperCase();
+          printContent.appendChild(categoryTitle);
+
+          const table = document.createElement('table');
+          table.style.width = '100%';
+          table.style.marginBottom = '20px';
+          table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid black; padding: 8px;">Task</th>
+                            <th style="border: 1px solid black; padding: 8px; width: 100px;">Status</th>
+                            <th style="border: 1px solid black; padding: 8px;">Spesifikasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tasks
+                          .map(
+                            (task) => `
                             <tr>
-                                <th class="border p-2 text-left">Task</th>
-                                <th class="border p-2 text-center w-24">Status</th>
-                                <th class="border p-2 text-left">Spesifikasi</th>
+                                <td style="border: 1px solid black; padding: 8px;">${task.task}</td>
+                                <td style="border: 1px solid black; padding: 8px; text-align: center;">
+                                    ${task.completed ? '✓' : ''}
+                                </td>
+                                <td style="border: 1px solid black; padding: 8px;">
+                                    ${task.spec || '-'}
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            ${tasks
-                              .map(
-                                (task) => `
-                                <tr>
-                                    <td class="border p-2">${task.task}</td>
-                                    <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
-                                    <td class="border p-2">${task.spec || '-'}</td>
-                                </tr>
-                            `
-                              )
-                              .join('')}
-                        </tbody>
-                    </table>
+                        `
+                          )
+                          .join('')}
+                    </tbody>
                 `;
-          printTaskList.appendChild(categoryElement);
-        }
+          printContent.appendChild(table);
+        });
+
+        // Trigger print
+        window.print();
       }
 
       // Set default date
