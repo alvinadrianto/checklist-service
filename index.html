@@ -8,71 +8,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @media print {
-            .no-print { 
-                display: none !important; 
-            }
-            .print-view { 
-                display: block !important; 
-            }
-            table { 
-                border-collapse: collapse; 
-                width: 100%; 
-            }
-            th, td { 
-                border: 1px solid black; 
-                padding: 8px; 
-            }
-            .vehicle-info { 
-                border: 1px solid black; 
-                padding: 15px; 
-                margin-bottom: 20px; 
-            }
-            .sign-area { 
-                margin-top: 50px; 
-                display: flex; 
-                justify-content: space-between; 
-            }
+            .no-print { display: none !important; }
+            .print-view { display: block !important; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid black; padding: 8px; }
+            .vehicle-info { border: 1px solid black; padding: 15px; margin-bottom: 20px; }
+            .sign-area { margin-top: 50px; display: flex; justify-content: space-between; }
         }
-        .print-view { 
-            display: none; 
-        }
-
+        .print-view { display: none; }
         .delete-btn {
             padding: 4px 8px;
             color: #ef4444;
             cursor: pointer;
             transition: all 0.2s;
         }
-        
         .delete-btn:hover {
             color: #dc2626;
             transform: scale(1.1);
         }
-
         .checkbox-locked {
             opacity: 0.7;
             cursor: not-allowed;
         }
-
         .task-completed {
             background-color: #f0fff4;
             border-color: #34d399 !important;
-        }
-
-        @media (max-width: 640px) {
-            .container { 
-                padding: 10px; 
-            }
-            .grid { 
-                gap: 10px; 
-            }
         }
     </style>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto p-4 max-w-3xl">
         <div class="bg-white shadow rounded-lg p-6">
-            <!-- Input Section -->
+            <!-- Form Input -->
             <div class="no-print">
                 <h1 class="text-2xl font-bold mb-4">Checklist Servis Berkala</h1>
                 
@@ -96,58 +63,45 @@
                     <input type="date" id="serviceDate" class="w-full border p-2 rounded">
                 </div>
 
-                <!-- Task Categories -->
-                <div class="grid grid-cols-3 gap-2 mb-4">
-                    <button onclick="addTaskGroup('pre-check')" 
-                            class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                        + Pre-Check
+                <!-- Task Management -->
+                <div class="space-y-4">
+                    <button onclick="addAllTasks()" 
+                            class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                        Tambah Semua Task
                     </button>
-                    <button onclick="addTaskGroup('torque')" 
-                            class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                        + Torsi
-                    </button>
-                    <button onclick="addTaskGroup('safety')" 
-                            class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                        + Safety
-                    </button>
-                </div>
 
-                <!-- Custom Task -->
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="customTask" placeholder="Task krusial lainnya..." 
-                           class="flex-1 border p-2 rounded">
-                    <button onclick="addCustomTask()" 
-                            class="bg-green-500 text-white px-4 rounded hover:bg-green-600">
-                        +
-                    </button>
-                </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="customTask" placeholder="Task tambahan..." 
+                               class="flex-1 border p-2 rounded">
+                        <button onclick="addCustomTask()" 
+                                class="bg-green-500 text-white px-4 rounded hover:bg-green-600">
+                            +
+                        </button>
+                    </div>
 
-                <div class="flex gap-2 mb-4">
                     <button onclick="deleteAllTasks()" 
-                            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            class="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
                         Hapus Semua Task
                     </button>
+
+                    <!-- Task List -->
+                    <div id="taskList" class="space-y-2"></div>
+
+                    <!-- Print Button -->
+                    <button onclick="preparePrint()" 
+                            class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mt-4">
+                        Cetak PDF
+                    </button>
                 </div>
-
-                <!-- Task List -->
-                <div id="taskList" class="space-y-2 mb-4"></div>
-
-                <!-- Print Button -->
-                <button onclick="preparePrint()" 
-                        class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
-                    Cetak PDF
-                </button>
             </div>
 
             <!-- Print Version -->
-            <div class="print-view" id="printVersion">
+            <div class="print-view">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1 style="font-size: 24px; font-weight: bold;">Laporan Servis Berkala</h1>
                 </div>
-
                 <div class="vehicle-info" id="printVehicleInfo"></div>
                 <div id="printContent"></div>
-
                 <div class="sign-area">
                     <div style="text-align: center;">
                         <p>Mekanik</p>
@@ -167,29 +121,37 @@
     </div>
 
     <script>
-        const criticalTasks = {
-            'pre-check': [
-                { id: 'pre-1', task: 'Cek semua lampu (sein, rem, head lamp)' },
-                { id: 'pre-2', task: 'Cek indikator warning di panel' },
-                { id: 'pre-3', task: 'Cek kondisi steering gearbox' },
-                { id: 'pre-4', task: 'Cek kondisi & fungsi wiper' },
-                { id: 'pre-5', task: 'Cek ketinggian rem tangan' },
-                { id: 'pre-6', task: 'Cek fungsi power window' },
-                { id: 'pre-7', task: 'Cek fungsi spion elektrik' },
-                { id: 'pre-8', task: 'Cek fungsi central lock' }
-            ],
-            'torque': [
-                { id: 'torque-1', task: 'Torsi baut drain oli', spec: '25-30 Nm' },
-                { id: 'torque-2', task: 'Torsi baut roda', spec: '80-100 Nm' },
-                { id: 'torque-3', task: 'Torsi caliper rem', spec: '35-40 Nm' }
-            ],
-            'safety': [
-                { id: 'safety-1', task: 'Cek kondisi pad rem' },
-                { id: 'safety-2', task: 'Cek kondisi ban' }
-            ]
-        };
+        // Definisi task dalam satu array
+        const defaultTasks = [
+            { task: 'Cek semua lampu (sein, rem, head lamp)' },
+            { task: 'Cek indikator warning di panel' },
+            { task: 'Cek kondisi steering gearbox' },
+            { task: 'Cek kondisi & fungsi wiper' },
+            { task: 'Cek ketinggian rem tangan' },
+            { task: 'Cek fungsi power window' },
+            { task: 'Cek fungsi spion elektrik' },
+            { task: 'Cek fungsi central lock' },
+            { task: 'Torsi baut drain oli', spec: '25-30 Nm' },
+            { task: 'Torsi baut roda', spec: '80-100 Nm' },
+            { task: 'Torsi caliper rem', spec: '35-40 Nm' },
+            { task: 'Cek kondisi pad rem' },
+            { task: 'Cek kondisi ban' }
+        ];
 
         let activeTasks = [];
+
+        function addAllTasks() {
+            defaultTasks.forEach(task => {
+                if (!activeTasks.some(t => t.task === task.task)) {
+                    activeTasks.push({
+                        id: `task-${Date.now()}-${Math.random()}`,
+                        ...task,
+                        completed: false
+                    });
+                }
+            });
+            renderTasks();
+        }
 
         function toggleTask(id) {
             const task = activeTasks.find(t => t.id === id);
@@ -232,6 +194,20 @@
             }
         }
 
+        function addCustomTask() {
+            const input = document.getElementById('customTask');
+            const task = input.value.trim();
+            if (task) {
+                activeTasks.push({
+                    id: `custom-${Date.now()}`,
+                    task: task,
+                    completed: false
+                });
+                input.value = '';
+                renderTasks();
+            }
+        }
+
         function renderTasks() {
             const taskList = document.getElementById('taskList');
             taskList.innerHTML = '';
@@ -262,32 +238,8 @@
             });
         }
 
-        function addTaskGroup(category) {
-            const tasks = criticalTasks[category];
-            tasks.forEach(task => {
-                if (!activeTasks.some(t => t.id === task.id)) {
-                    activeTasks.push({...task, completed: false, category});
-                }
-            });
-            renderTasks();
-        }
-
-        function addCustomTask() {
-            const input = document.getElementById('customTask');
-            const task = input.value.trim();
-            if (task) {
-                activeTasks.push({
-                    id: `custom-${Date.now()}`,
-                    task: task,
-                    completed: false,
-                    category: 'custom'
-                });
-                input.value = '';
-                renderTasks();
-            }
-        }
-
         function preparePrint() {
+            // Update vehicle info
             const vehicleInfo = document.getElementById('printVehicleInfo');
             vehicleInfo.innerHTML = `
                 <table style="width: 100%;">
@@ -314,27 +266,10 @@
                 </table>
             `;
 
+            // Generate task table
             const printContent = document.getElementById('printContent');
-            printContent.innerHTML = '';
-
-            const groupedTasks = {};
-            activeTasks.forEach(task => {
-                if (!groupedTasks[task.category]) {
-                    groupedTasks[task.category] = [];
-                }
-                groupedTasks[task.category].push(task);
-            });
-
-            Object.entries(groupedTasks).forEach(([category, tasks]) => {
-                const categoryTitle = document.createElement('h3');
-                categoryTitle.style.fontWeight = 'bold';
-                categoryTitle.style.marginTop = '20px';
-                categoryTitle.style.marginBottom = '10px';
-                categoryTitle.textContent = category.replace('-', ' ').toUpperCase();
-                printContent.appendChild(categoryTitle);
-
-                const table = document.createElement('table');
-                table.innerHTML = `
+            printContent.innerHTML = `
+                <table>
                     <thead>
                         <tr>
                             <th>Task</th>
@@ -343,7 +278,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${tasks.map(task => `
+                        ${activeTasks.map(task => `
                             <tr>
                                 <td>${task.task}</td>
                                 <td style="text-align: center;">${task.completed ? '✓' : ''}</td>
@@ -351,9 +286,8 @@
                             </tr>
                         `).join('')}
                     </tbody>
-                `;
-                printContent.appendChild(table);
-            });
+                </table>
+            `;
 
             window.print();
         }
