@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html lang="id">
-<!-- [Previous head section remains the same] -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist Servis Berkala</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tambah ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* [Previous styles remain the same] */
         @media print {
-            .no-print { display: none !important; }
-            .print-view { display: block !important; }
-            table { border-collapse: collapse; width: 100%; }
-            th, td { border: 1px solid black; padding: 8px; }
-            .vehicle-info { border: 1px solid black; padding: 15px; margin-bottom: 20px; }
-            .sign-area { margin-top: 50px; display: flex; justify-content: space-between; }
+            .no-print { 
+                display: none !important; 
+            }
+            .print-view { 
+                display: block !important; 
+            }
+            table { 
+                border-collapse: collapse; 
+                width: 100%; 
+            }
+            th, td { 
+                border: 1px solid black; 
+                padding: 8px; 
+            }
+            .vehicle-info { 
+                border: 1px solid black; 
+                padding: 15px; 
+                margin-bottom: 20px; 
+            }
+            .sign-area { 
+                margin-top: 50px; 
+                display: flex; 
+                justify-content: space-between; 
+            }
         }
-        .print-view { display: none; }
+        .print-view { 
+            display: none; 
+        }
 
         .delete-btn {
             padding: 4px 8px;
@@ -32,14 +49,27 @@
             transform: scale(1.1);
         }
 
+        .checkbox-locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .task-completed {
+            background-color: #f0fff4;
+            border-color: #34d399 !important;
+        }
+
         @media (max-width: 640px) {
-            .container { padding: 10px; }
-            .grid { gap: 10px; }
+            .container { 
+                padding: 10px; 
+            }
+            .grid { 
+                gap: 10px; 
+            }
         }
     </style>
 </head>
 <body class="bg-gray-100">
-    <!-- [Previous body structure remains the same until taskList] -->
     <div class="container mx-auto p-4 max-w-3xl">
         <div class="bg-white shadow rounded-lg p-6">
             <!-- Input Section -->
@@ -109,7 +139,7 @@
                 </button>
             </div>
 
-            <!-- [Previous print version remains the same] -->
+            <!-- Print Version -->
             <div class="print-view" id="printVersion">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1 style="font-size: 24px; font-weight: bold;">Laporan Servis Berkala</h1>
@@ -137,7 +167,6 @@
     </div>
 
     <script>
-        // [Previous task templates remain the same]
         const criticalTasks = {
             'pre-check': [
                 { id: 'pre-1', task: 'Cek semua lampu (sein, rem, head lamp)' },
@@ -162,47 +191,77 @@
 
         let activeTasks = [];
 
-        // Add delete function
+        function toggleTask(id) {
+            const task = activeTasks.find(t => t.id === id);
+            if (task && !task.completed) {
+                if (confirm(`Tandai task "${task.task}" sebagai selesai? (Tidak dapat dibatalkan)`)) {
+                    task.completed = true;
+                    task.completedTime = new Date().toLocaleTimeString();
+                    renderTasks();
+                }
+            }
+        }
+
         function deleteTask(id) {
-            if (confirm('Yakin ingin menghapus task ini?')) {
-                activeTasks = activeTasks.filter(task => task.id !== id);
-                renderTasks();
+            const task = activeTasks.find(t => t.id === id);
+            if (task.completed) {
+                if (confirm(`Task ini sudah selesai pada ${task.completedTime}. Yakin ingin menghapus?`)) {
+                    activeTasks = activeTasks.filter(t => t.id !== id);
+                    renderTasks();
+                }
+            } else {
+                if (confirm('Yakin ingin menghapus task ini?')) {
+                    activeTasks = activeTasks.filter(t => t.id !== id);
+                    renderTasks();
+                }
             }
         }
 
-        // Add delete all function
         function deleteAllTasks() {
-            if (confirm('Yakin ingin menghapus semua task?')) {
-                activeTasks = [];
-                renderTasks();
+            const completedTasks = activeTasks.filter(t => t.completed).length;
+            if (completedTasks > 0) {
+                if (confirm(`Terdapat ${completedTasks} task yang sudah selesai. Yakin ingin menghapus semua task?`)) {
+                    activeTasks = [];
+                    renderTasks();
+                }
+            } else {
+                if (confirm('Yakin ingin menghapus semua task?')) {
+                    activeTasks = [];
+                    renderTasks();
+                }
             }
         }
 
-        // Update render tasks function
         function renderTasks() {
             const taskList = document.getElementById('taskList');
             taskList.innerHTML = '';
             
             activeTasks.forEach(task => {
                 const div = document.createElement('div');
-                div.className = 'border p-3 rounded flex items-center gap-2';
+                div.className = `border p-3 rounded flex items-center gap-2 ${task.completed ? 'task-completed' : ''}`;
+                
                 div.innerHTML = `
                     <input type="checkbox" 
-                           ${task.completed ? 'checked' : ''} 
+                           ${task.completed ? 'checked disabled' : ''} 
                            onclick="toggleTask('${task.id}')"
-                           class="w-4 h-4">
+                           class="w-4 h-4 ${task.completed ? 'checkbox-locked' : ''}"
+                           title="${task.completed ? 'Task sudah selesai' : 'Centang jika selesai'}">
                     <div class="flex-1">
                         <span class="${task.completed ? 'line-through' : ''}">${task.task}</span>
                         ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
+                        ${task.completed ? `
+                            <div class="text-sm text-green-600">
+                                Selesai: ${task.completedTime}
+                            </div>
+                        ` : ''}
                     </div>
                     <i class="fas fa-trash delete-btn" onclick="deleteTask('${task.id}')" 
-                       title="Hapus task"></i>
+                       title="${task.completed ? 'Hapus task (sudah selesai)' : 'Hapus task'}"></i>
                 `;
                 taskList.appendChild(div);
             });
         }
 
-        // [Rest of the functions remain the same]
         function addTaskGroup(category) {
             const tasks = criticalTasks[category];
             tasks.forEach(task => {
@@ -228,15 +287,6 @@
             }
         }
 
-        function toggleTask(id) {
-            const task = activeTasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                renderTasks();
-            }
-        }
-
-        // [Previous print preparation function remains the same]
         function preparePrint() {
             const vehicleInfo = document.getElementById('printVehicleInfo');
             vehicleInfo.innerHTML = `
