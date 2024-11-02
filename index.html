@@ -43,6 +43,13 @@
             gap: 8px;
             margin-bottom: 16px;
         }
+        .hidden {
+            display: none;
+        }
+        .confirmed {
+            background-color: #f0fff4;
+            border-color: #34d399;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -52,8 +59,8 @@
             <div class="no-print">
                 <h1 class="text-2xl font-bold mb-4">Checklist Servis Berkala</h1>
                 
-                <!-- Vehicle Info -->
-                <div class="space-y-4 mb-6">
+                <!-- Vehicle Info Section -->
+                <div id="vehicleInfoSection" class="space-y-4 mb-6 p-4 border rounded">
                     <input type="text" id="plateNumber" placeholder="Nomor Polisi" 
                            class="w-full border p-2 rounded uppercase"
                            oninput="this.value = this.value.toUpperCase()"
@@ -87,70 +94,76 @@
                     </select>
 
                     <input type="date" id="serviceDate" class="w-full border p-2 rounded">
-                </div>
 
-                <!-- Service Buttons -->
-                <div class="service-buttons">
-                    <button onclick="addTasks('preCheck')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Pre-Check
+                    <button onclick="confirmVehicleInfo()" id="confirmButton"
+                            class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                        Konfirmasi Data Kendaraan
                     </button>
-                    <button onclick="addTasks('oil')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Oli
-                    </button>
-                    <button onclick="addTasks('brake')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Rem
-                    </button>
-                    <button onclick="addTasks('transmission')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Transmisi
-                    </button>
-                    <button onclick="addTasks('tuneUp')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Tune Up
-                    </button>
-                    <button onclick="addTasks('coolant')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Coolant
-                    </button>
-                    <button onclick="addTasks('wheel')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Roda
-                    </button>
-                    <button onclick="addTasks('sparkPlug')" 
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded">
-                        + Busi
+
+                    <button onclick="editVehicleInfo()" id="editButton"
+                            class="w-full bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 hidden">
+                        Edit Data Kendaraan
                     </button>
                 </div>
 
-                <!-- Custom Task -->
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="customTask" placeholder="Task tambahan..." 
-                           class="flex-1 border p-2 rounded">
-                    <button onclick="addCustomTask()" 
-                            class="bg-green-500 text-white px-4 rounded hover:bg-green-600">
-                        +
+                <!-- Service Section (Initially Hidden) -->
+                <div id="serviceSection" class="hidden">
+                    <!-- Service Buttons -->
+                    <div class="service-buttons mb-4">
+                        <button onclick="addTaskGroup('preCheck')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Pre-Check
+                        </button>
+                        <button onclick="addTaskGroup('oil')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Oli
+                        </button>
+                        <button onclick="addTaskGroup('brake')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Rem
+                        </button>
+                        <button onclick="addTaskGroup('transmission')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Transmisi
+                        </button>
+                        <button onclick="addTaskGroup('tuneUp')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Tune Up
+                        </button>
+                        <button onclick="addTaskGroup('coolant')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Coolant
+                        </button>
+                        <button onclick="addTaskGroup('wheel')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Roda
+                        </button>
+                        <button onclick="addTaskGroup('sparkPlug')" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                            + Busi
+                        </button>
+                    </div>
+
+                    <!-- Custom Task -->
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="customTask" placeholder="Task tambahan..." 
+                               class="flex-1 border p-2 rounded">
+                        <button onclick="addCustomTask()" 
+                                class="bg-green-500 text-white px-4 rounded hover:bg-green-600">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- Delete All Button -->
+                    <button onclick="deleteAllTasks()" 
+                            class="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600 mb-4">
+                        Hapus Semua Task
+                    </button>
+
+                    <!-- Task List -->
+                    <div id="taskList" class="space-y-2 mb-4"></div>
+
+                    <!-- Print Button -->
+                    <button onclick="preparePrint()" 
+                            class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
+                        Cetak PDF
                     </button>
                 </div>
-
-                <button onclick="deleteAllTasks()" 
-                        class="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600 mb-4">
-                    Hapus Semua Task
-                </button>
-
-                <!-- Task List -->
-                <div id="taskList" class="space-y-2 mb-4"></div>
-
-                <!-- Print Button -->
-                <button onclick="preparePrint()" 
-                        class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
-                    Cetak PDF
-                </button>
             </div>
 
-            <!-- Print Version -->
+            <!-- Print Version [Same as before] -->
             <div class="print-view">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h1 style="font-size: 24px; font-weight: bold;">Laporan Servis Berkala</h1>
@@ -177,7 +190,7 @@
 
     <script>
         // Task definitions
-        const serviceChecklist = {
+        const taskGroups = {
             preCheck: [
                 { task: 'Cek semua lampu (sein, rem, head lamp)' },
                 { task: 'Cek indikator warning di panel' },
@@ -223,70 +236,92 @@
         };
 
         let activeTasks = [];
+        let vehicleInfoConfirmed = false;
 
-        // Add tasks from checklist
-        function addTasks(groupName) {
-            const tasks = serviceChecklist[groupName];
-            if (tasks) {
-                tasks.forEach(task => {
-                    if (!activeTasks.some(t => t.task === task.task)) {
-                        activeTasks.push({
-                            id: `task-${Date.now()}-${Math.random()}`,
-                            ...task,
-                            completed: false
-                        });
-                    }
-                });
+        // Confirm vehicle information
+        function confirmVehicleInfo() {
+            const plateNumber = document.getElementById('plateNumber').value;
+            const carModel = document.getElementById('carModel').value;
+            const kilometer = document.getElementById('kilometer').value;
+            const serviceType = document.getElementById('serviceType').value;
+            const serviceDate = document.getElementById('serviceDate').value;
+
+            if (!plateNumber || !carModel || !kilometer || !serviceType || !serviceDate) {
+                alert('Mohon lengkapi semua data kendaraan');
+                return;
+            }
+
+            if (confirm('Konfirmasi data kendaraan? Data tidak dapat diubah setelah dikonfirmasi.')) {
+                // Disable all inputs
+                document.getElementById('plateNumber').disabled = true;
+                document.getElementById('carModel').disabled = true;
+                document.getElementById('kilometer').disabled = true;
+                document.getElementById('serviceType').disabled = true;
+                document.getElementById('serviceDate').disabled = true;
+
+                // Show/hide buttons
+                document.getElementById('confirmButton').classList.add('hidden');
+                document.getElementById('editButton').classList.remove('hidden');
+                document.getElementById('vehicleInfoSection').classList.add('confirmed');
+                document.getElementById('serviceSection').classList.remove('hidden');
+
+                vehicleInfoConfirmed = true;
+            }
+        }
+
+        // Edit vehicle information
+        function editVehicleInfo() {
+            if (activeTasks.length > 0) {
+                if (!confirm('Mengubah data kendaraan akan menghapus semua task. Lanjutkan?')) {
+                    return;
+                }
+                activeTasks = [];
                 renderTasks();
             }
+
+            // Enable all inputs
+            document.getElementById('plateNumber').disabled = false;
+            document.getElementById('carModel').disabled = false;
+            document.getElementById('kilometer').disabled = false;
+            document.getElementById('serviceType').disabled = false;
+            document.getElementById('serviceDate').disabled = false;
+
+            // Show/hide buttons
+            document.getElementById('confirmButton').classList.remove('hidden');
+            document.getElementById('editButton').classList.add('hidden');
+            document.getElementById('vehicleInfoSection').classList.remove('confirmed');
+            document.getElementById('serviceSection').classList.add('hidden');
+
+            vehicleInfoConfirmed = false;
         }
 
-        // Toggle task completion
-        function toggleTask(id) {
-            const task = activeTasks.find(t => t.id === id);
-            if (task && !task.completed) {
-                if (confirm(`Tandai task "${task.task}" sebagai selesai? (Tidak dapat dibatalkan)`)) {
-                    task.completed = true;
-                    task.completedTime = new Date().toLocaleTimeString();
-                    renderTasks();
-                }
+        // Add tasks from group
+        function addTaskGroup(groupName) {
+            if (!vehicleInfoConfirmed) {
+                alert('Harap konfirmasi data kendaraan terlebih dahulu');
+                return;
             }
-        }
 
-        // Delete specific task
-        function deleteTask(id) {
-            const task = activeTasks.find(t => t.id === id);
-            if (task.completed) {
-                if (confirm(`Task ini sudah selesai pada ${task.completedTime}. Yakin ingin menghapus?`)) {
-                    activeTasks = activeTasks.filter(t => t.id !== id);
-                    renderTasks();
+            const tasks = taskGroups[groupName];
+            tasks.forEach(task => {
+                if (!activeTasks.some(t => t.task === task.task)) {
+                    activeTasks.push({
+                        id: `task-${Date.now()}-${Math.random()}`,
+                        ...task,
+                        completed: false
+                    });
                 }
-            } else {
-                if (confirm('Yakin ingin menghapus task ini?')) {
-                    activeTasks = activeTasks.filter(t => t.id !== id);
-                    renderTasks();
-                }
-            }
-        }
-
-        // Delete all tasks
-        function deleteAllTasks() {
-            const completedTasks = activeTasks.filter(t => t.completed).length;
-            if (completedTasks > 0) {
-                if (confirm(`Terdapat ${completedTasks} task yang sudah selesai. Yakin ingin menghapus semua task?`)) {
-                    activeTasks = [];
-                    renderTasks();
-                }
-            } else {
-                if (confirm('Yakin ingin menghapus semua task?')) {
-                    activeTasks = [];
-                    renderTasks();
-                }
-            }
+            });
+            renderTasks();
         }
 
         // Add custom task
         function addCustomTask() {
+            if (!vehicleInfoConfirmed) {
+                alert('Harap konfirmasi data kendaraan terlebih dahulu');
+                return;
+            }
+
             const input = document.getElementById('customTask');
             const task = input.value.trim();
             if (task) {
@@ -300,43 +335,11 @@
             }
         }
 
-        // Render task list
-        function renderTasks() {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            
-            activeTasks.forEach(task => {
-                const div = document.createElement('div');
-                div.className = `border p-3 rounded flex items-center gap-2 ${task.completed ? 'task-completed' : ''}`;
-                
-                div.innerHTML = `
-                    <input type="checkbox" 
-                           ${task.completed ? 'checked disabled' : ''} 
-                           onclick="toggleTask('${task.id}')"
-                           class="w-4 h-4 ${task.completed ? 'checkbox-locked' : ''}"
-                           title="${task.completed ? 'Task sudah selesai' : 'Centang jika selesai'}">
-                    <div class="flex-1">
-                        <span class="${task.completed ? 'line-through' : ''}">${task.task}</span>
-                        ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
-                        ${task.completed ? `
-                            <div class="text-sm text-green-600">
-                                Selesai: ${task.completedTime}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <i class="fas fa-trash delete-btn" onclick="deleteTask('${task.id}')" 
-                       title="${task.completed ? 'Hapus task (sudah selesai)' : 'Hapus task'}"></i>
-                `;
-                taskList.appendChild(div);
-            });
-        }
-
-        // Prepare and show print version
-        function preparePrint() {
-            const vehicleInfo = document.getElementById('printVehicleInfo');
-            vehicleInfo.innerHTML = `
-                <table style="width: 100%;">
-                    <tr>
-                        <td style="width: 150px;">Nomor Polisi</td>
-                        <td>: ${document.getElementById('plateNumber').value}</td>
-                    </tr>
+        // Rest of the functions remain the same
+        function toggleTask(id) {
+            const task = activeTasks.find(t => t.id === id);
+            if (task && !task.completed) {
+                if (confirm(`Tandai task "${task.task}" sebagai selesai? (Tidak dapat dibatalkan)`)) {
+                    task.completed = true;
+                    task.completedTime = new Date().toLocaleTimeString();
+                    renderTasks();
