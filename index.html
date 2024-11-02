@@ -10,7 +10,24 @@
         @media print {
             .no-print { display: none; }
             .print-only { display: block; }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+            .print-table {
+                page-break-inside: avoid;
+            }
         }
+        .no-print { display: none; }
         .print-only { display: none; }
         .completed { 
             background-color: #f0fdf4;
@@ -90,7 +107,7 @@
         <!-- Print Layout -->
         <div class="print-only">
             <h1 class="text-xl font-bold mb-4 text-center">Checklist Servis</h1>
-            <div id="printInfo" class="mb-4"></div>
+            <div id="printInfo"></div>
             <div id="printTasks"></div>
             <div class="mt-8 flex justify-between">
                 <div class="text-center">
@@ -262,43 +279,41 @@
         }
 
         function updatePrintVersion() {
+            const info = {
+                'Nomor Polisi': document.getElementById('plateNumber').value,
+                'Model': document.getElementById('carModel').value,
+                'Kilometer': `${document.getElementById('km').value} KM`,
+                'Jenis Servis': document.getElementById('serviceType').value,
+                'Tanggal': document.getElementById('date').value
+            };
+
             document.getElementById('printInfo').innerHTML = `
-                <table class="w-full border-collapse mb-4">
+                <table class="print-table">
+                    ${Object.entries(info).map(([key, value]) => `
                     <tr>
-                        <td class="border p-2 w-32">Nomor Polisi</td>
-                        <td class="border p-2">: ${document.getElementById('plateNumber').value}</td>
+                        <th>${key}</th>
+                        <td>${value}</td>
                     </tr>
-                    <tr>
-                        <td class="border p-2">Model</td>
-                        <td class="border p-2">: ${document.getElementById('carModel').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Kilometer</td>
-                        <td class="border p-2">: ${document.getElementById('km').value} KM</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Jenis Servis</td>
-                        <td class="border p-2">: ${document.getElementById('serviceType').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Tanggal</td>
-                        <td class="border p-2">: ${document.getElementById('date').value}</td>
-                    </tr>
+                    `).join('')}
                 </table>
             `;
 
             document.getElementById('printTasks').innerHTML = `
-                <table class="w-full border-collapse">
+                <table class="print-table">
                     <tr>
-                        <th class="border p-2">Task</th>
-                        <th class="border p-2" style="width: 100px;">Status</th>
-                        <th class="border p-2" style="width: 120px;">Spesifikasi</th>
+                        <th>No.</th>
+                        <th>Task</th>
+                        <th>Status</th>
+                        <th>Spesifikasi</th>
+                        <th>Waktu Selesai</th>
                     </tr>
-                    ${checklist.map(task => `
+                    ${checklist.map((task, index) => `
                         <tr>
-                            <td class="border p-2">${task.text}</td>
-                            <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
-                            <td class="border p-2">${task.spec || '-'}</td>
+                            <td>${index + 1}</td>
+                            <td>${task.text}</td>
+                            <td>${task.completed ? 'Selesai' : 'Belum Selesai'}</td>
+                            <td>${task.spec || '-'}</td>
+                            <td>${task.completed ? task.completedTime : '-'}</td>
                         </tr>
                     `).join('')}
                 </table>
