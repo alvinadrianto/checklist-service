@@ -34,6 +34,16 @@
             background-color: #f0fff4;
             border-color: #34d399 !important;
         }
+
+        .service-button {
+            @apply bg-blue-500 text-white p-2 rounded hover:bg-blue-600 text-sm;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -63,13 +73,36 @@
                     <input type="date" id="serviceDate" class="w-full border p-2 rounded">
                 </div>
 
-                <!-- Task Management -->
-                <div class="space-y-4">
-                    <button onclick="addAllTasks()" 
-                            class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                        Tambah Semua Task
-                    </button>
+                <!-- Service Buttons -->
+                <div class="space-y-4 mb-6">
+                    <div class="service-grid">
+                        <button onclick="addPreCheckTasks()" class="service-button">
+                            + Pre-Check
+                        </button>
+                        <button onclick="addOilTasks()" class="service-button">
+                            + Oli
+                        </button>
+                        <button onclick="addBrakeTasks()" class="service-button">
+                            + Rem
+                        </button>
+                        <button onclick="addTransmissionTasks()" class="service-button">
+                            + Transmisi
+                        </button>
+                        <button onclick="addTuneUpTasks()" class="service-button">
+                            + Tune Up
+                        </button>
+                        <button onclick="addCoolantTasks()" class="service-button">
+                            + Coolant
+                        </button>
+                        <button onclick="addWheelTasks()" class="service-button">
+                            + Roda
+                        </button>
+                        <button onclick="addSparkPlugTasks()" class="service-button">
+                            + Busi
+                        </button>
+                    </div>
 
+                    <!-- Custom Task Input -->
                     <div class="flex gap-2">
                         <input type="text" id="customTask" placeholder="Task tambahan..." 
                                class="flex-1 border p-2 rounded">
@@ -83,16 +116,16 @@
                             class="w-full bg-red-500 text-white p-2 rounded hover:bg-red-600">
                         Hapus Semua Task
                     </button>
-
-                    <!-- Task List -->
-                    <div id="taskList" class="space-y-2"></div>
-
-                    <!-- Print Button -->
-                    <button onclick="preparePrint()" 
-                            class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 mt-4">
-                        Cetak PDF
-                    </button>
                 </div>
+
+                <!-- Task List -->
+                <div id="taskList" class="space-y-2 mb-4"></div>
+
+                <!-- Print Button -->
+                <button onclick="preparePrint()" 
+                        class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
+                    Cetak PDF
+                </button>
             </div>
 
             <!-- Print Version -->
@@ -121,27 +154,58 @@
     </div>
 
     <script>
-        // Definisi task dalam satu array
-        const defaultTasks = [
-            { task: 'Cek semua lampu (sein, rem, head lamp)' },
-            { task: 'Cek indikator warning di panel' },
-            { task: 'Cek kondisi steering gearbox' },
-            { task: 'Cek kondisi & fungsi wiper' },
-            { task: 'Cek ketinggian rem tangan' },
-            { task: 'Cek fungsi power window' },
-            { task: 'Cek fungsi spion elektrik' },
-            { task: 'Cek fungsi central lock' },
-            { task: 'Torsi baut drain oli', spec: '25-30 Nm' },
-            { task: 'Torsi baut roda', spec: '80-100 Nm' },
-            { task: 'Torsi caliper rem', spec: '35-40 Nm' },
-            { task: 'Cek kondisi pad rem' },
-            { task: 'Cek kondisi ban' }
-        ];
+        // Task definitions for each service group
+        const taskGroups = {
+            preCheck: [
+                { task: 'Cek semua lampu (sein, rem, head lamp)' },
+                { task: 'Cek indikator warning di panel' },
+                { task: 'Cek kondisi steering gearbox' },
+                { task: 'Cek kondisi & fungsi wiper' },
+                { task: 'Cek ketinggian rem tangan' },
+                { task: 'Cek fungsi power window' },
+                { task: 'Cek fungsi spion elektrik' },
+                { task: 'Cek fungsi central lock' }
+            ],
+            oil: [
+                { task: 'Isi oli mesin sesuai spesifikasi' },
+                { task: 'Torsi baut drain oli', spec: '25-30 Nm' },
+                { task: 'Torsi filter oli', spec: '15-17 Nm' }
+            ],
+            brake: [
+                { task: 'Torsi kaliper rem', spec: '35-40 Nm' },
+                { task: 'Bleeding rem' },
+                { task: 'Bersihkan rem' }
+            ],
+            transmission: [
+                { task: 'Isi oli transmisi sesuai spesifikasi' },
+                { task: 'Torsi baut drain transmisi', spec: '30-35 Nm' }
+            ],
+            tuneUp: [
+                { task: 'Bersihkan throttle body' },
+                { task: 'Cek/ganti filter udara' },
+                { task: 'Cek idle speed' }
+            ],
+            coolant: [
+                { task: 'Isi coolant sesuai spesifikasi' },
+                { task: 'Periksa tutup radiator' },
+                { task: 'Periksa kebocoran sistem pendingin' }
+            ],
+            wheel: [
+                { task: 'Torsi baut roda', spec: '80-100 Nm' },
+                { task: 'Cek kondisi ban' }
+            ],
+            sparkPlug: [
+                { task: 'Ganti busi', spec: '20-25 Nm' },
+                { task: 'Cek kondisi busi lama' }
+            ]
+        };
 
         let activeTasks = [];
 
-        function addAllTasks() {
-            defaultTasks.forEach(task => {
+        // Add tasks from specific group
+        function addTaskGroup(groupName) {
+            const tasks = taskGroups[groupName];
+            tasks.forEach(task => {
                 if (!activeTasks.some(t => t.task === task.task)) {
                     activeTasks.push({
                         id: `task-${Date.now()}-${Math.random()}`,
@@ -153,6 +217,17 @@
             renderTasks();
         }
 
+        // Function for each service group
+        function addPreCheckTasks() { addTaskGroup('preCheck'); }
+        function addOilTasks() { addTaskGroup('oil'); }
+        function addBrakeTasks() { addTaskGroup('brake'); }
+        function addTransmissionTasks() { addTaskGroup('transmission'); }
+        function addTuneUpTasks() { addTaskGroup('tuneUp'); }
+        function addCoolantTasks() { addTaskGroup('coolant'); }
+        function addWheelTasks() { addTaskGroup('wheel'); }
+        function addSparkPlugTasks() { addTaskGroup('sparkPlug'); }
+
+        // Toggle task completion
         function toggleTask(id) {
             const task = activeTasks.find(t => t.id === id);
             if (task && !task.completed) {
@@ -164,6 +239,7 @@
             }
         }
 
+        // Delete specific task
         function deleteTask(id) {
             const task = activeTasks.find(t => t.id === id);
             if (task.completed) {
@@ -179,6 +255,7 @@
             }
         }
 
+        // Delete all tasks
         function deleteAllTasks() {
             const completedTasks = activeTasks.filter(t => t.completed).length;
             if (completedTasks > 0) {
@@ -194,6 +271,7 @@
             }
         }
 
+        // Add custom task
         function addCustomTask() {
             const input = document.getElementById('customTask');
             const task = input.value.trim();
@@ -208,6 +286,7 @@
             }
         }
 
+        // Render task list
         function renderTasks() {
             const taskList = document.getElementById('taskList');
             taskList.innerHTML = '';
@@ -238,8 +317,8 @@
             });
         }
 
+        // Prepare and show print version
         function preparePrint() {
-            // Update vehicle info
             const vehicleInfo = document.getElementById('printVehicleInfo');
             vehicleInfo.innerHTML = `
                 <table style="width: 100%;">
@@ -261,39 +340,4 @@
                     </tr>
                     <tr>
                         <td>Tanggal</td>
-                        <td>: ${new Date(document.getElementById('serviceDate').value).toLocaleDateString('id-ID')}</td>
-                    </tr>
-                </table>
-            `;
-
-            // Generate task table
-            const printContent = document.getElementById('printContent');
-            printContent.innerHTML = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Task</th>
-                            <th style="width: 100px;">Status</th>
-                            <th>Spesifikasi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${activeTasks.map(task => `
-                            <tr>
-                                <td>${task.task}</td>
-                                <td style="text-align: center;">${task.completed ? '✓' : ''}</td>
-                                <td>${task.spec || '-'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-
-            window.print();
-        }
-
-        // Set default date
-        document.getElementById('serviceDate').valueAsDate = new Date();
-    </script>
-</body>
-</html>
+                        <td>: ${new Date(document.getElementById('serviceDate').value
