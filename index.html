@@ -1,351 +1,206 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checklist Servis</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .print-view { display: none; }
         @media print {
-            .no-print { display: none !important; }
-            .print-view { display: block !important; }
+            .no-print { display: none; }
+            .print-only { display: block; }
         }
+        .print-only { display: none; }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-3xl mx-auto p-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <!-- Info Kendaraan -->
-            <div class="no-print" id="infoSection">
-                <h1 class="text-xl font-bold mb-4">Data Kendaraan</h1>
-                <div class="space-y-4">
-                    <input type="text" id="plateNumber" placeholder="Nomor Polisi" 
-                           class="w-full p-2 border rounded uppercase">
-                           
-                    <select id="carModel" class="w-full p-2 border rounded">
-                        <option value="">Pilih Model Mobil</option>
-                        <option value="BRIO">HONDA BRIO</option>
-                        <option value="MOBILIO">HONDA MOBILIO</option>
-                        <option value="HRV">HONDA HR-V</option>
-                        <option value="BRV">HONDA BR-V</option>
-                        <option value="CRV">HONDA CR-V</option>
-                        <option value="JAZZ">HONDA JAZZ</option>
-                        <option value="CIVIC">HONDA CIVIC</option>
-                        <option value="CITY">HONDA CITY</option>
-                        <option value="FREED">HONDA FREED</option>
-                        <option value="ACCORD">HONDA ACCORD</option>
-                    </select>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
+        <!-- Vehicle Info -->
+        <div class="mb-6" id="infoSection">
+            <input id="plateNumber" placeholder="Nomor Polisi" class="w-full p-2 mb-2 border rounded uppercase">
+            
+            <select id="carModel" class="w-full p-2 mb-2 border rounded">
+                <option value="">Pilih Model</option>
+                <option>HONDA BRIO</option>
+                <option>HONDA MOBILIO</option>
+                <option>HONDA HRV</option>
+                <option>HONDA BRV</option>
+                <option>HONDA CRV</option>
+                <option>HONDA JAZZ</option>
+                <option>HONDA CIVIC</option>
+                <option>HONDA CITY</option>
+                <option>HONDA FREED</option>
+                <option>HONDA ACCORD</option>
+            </select>
 
-                    <input type="number" id="kilometer" placeholder="Kilometer" 
-                           class="w-full p-2 border rounded">
+            <input type="number" id="km" placeholder="Kilometer" class="w-full p-2 mb-2 border rounded">
+            
+            <select id="serviceType" class="w-full p-2 mb-2 border rounded">
+                <option value="">Jenis Servis</option>
+                <option>Servis 1.000 KM</option>
+                <option>Servis 10.000 KM</option>
+                <option>Servis 20.000 KM</option>
+                <option>Servis 30.000 KM</option>
+                <option>Servis 40.000 KM</option>
+                <option>Servis 50.000 KM</option>
+            </select>
 
-                    <select id="serviceType" class="w-full p-2 border rounded">
-                        <option value="">Pilih Jenis Servis</option>
-                        <option value="1K">Servis 1.000 KM</option>
-                        <option value="10K">Servis 10.000 KM</option>
-                        <option value="20K">Servis 20.000 KM</option>
-                        <option value="30K">Servis 30.000 KM</option>
-                        <option value="40K">Servis 40.000 KM</option>
-                        <option value="50K">Servis 50.000 KM</option>
-                    </select>
+            <input type="date" id="date" class="w-full p-2 mb-4 border rounded">
+            
+            <button onclick="lockInfo()" id="lockBtn" class="w-full p-2 bg-blue-500 text-white rounded">
+                Konfirmasi Data
+            </button>
+        </div>
 
-                    <input type="date" id="serviceDate" class="w-full p-2 border rounded">
-
-                    <button onclick="lockInfo()" id="lockBtn" 
-                            class="w-full bg-blue-500 text-white p-2 rounded">
-                        Konfirmasi Data
-                    </button>
-                </div>
+        <!-- Tasks Section (Hidden initially) -->
+        <div id="taskSection" style="display:none;">
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button onclick="addTask('precheck')" class="p-2 bg-blue-500 text-white rounded">+ Pre-Check</button>
+                <button onclick="addTask('oil')" class="p-2 bg-blue-500 text-white rounded">+ Oli</button>
+                <button onclick="addTask('brake')" class="p-2 bg-blue-500 text-white rounded">+ Rem</button>
+                <button onclick="addTask('transmission')" class="p-2 bg-blue-500 text-white rounded">+ Transmisi</button>
+                <button onclick="addTask('tuneup')" class="p-2 bg-blue-500 text-white rounded">+ Tune Up</button>
+                <button onclick="addTask('coolant')" class="p-2 bg-blue-500 text-white rounded">+ Coolant</button>
+                <button onclick="addTask('wheel')" class="p-2 bg-blue-500 text-white rounded">+ Roda</button>
+                <button onclick="addTask('sparkplug')" class="p-2 bg-blue-500 text-white rounded">+ Busi</button>
             </div>
 
-            <!-- Service Section -->
-            <div id="serviceSection" class="hidden no-print">
-                <div class="mt-8">
-                    <h2 class="text-xl font-bold mb-4">Task Servis</h2>
-                    
-                    <!-- Task Buttons -->
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <button onclick="addTasks('preCheck')" class="p-2 bg-blue-500 text-white rounded">
-                            + Pre-Check
-                        </button>
-                        <button onclick="addTasks('oil')" class="p-2 bg-blue-500 text-white rounded">
-                            + Oli
-                        </button>
-                        <button onclick="addTasks('brake')" class="p-2 bg-blue-500 text-white rounded">
-                            + Rem
-                        </button>
-                        <button onclick="addTasks('transmission')" class="p-2 bg-blue-500 text-white rounded">
-                            + Transmisi
-                        </button>
-                        <button onclick="addTasks('tuneUp')" class="p-2 bg-blue-500 text-white rounded">
-                            + Tune Up
-                        </button>
-                        <button onclick="addTasks('coolant')" class="p-2 bg-blue-500 text-white rounded">
-                            + Coolant
-                        </button>
-                        <button onclick="addTasks('wheel')" class="p-2 bg-blue-500 text-white rounded">
-                            + Roda
-                        </button>
-                        <button onclick="addTasks('sparkPlug')" class="p-2 bg-blue-500 text-white rounded">
-                            + Busi
-                        </button>
-                    </div>
+            <div id="taskList" class="mb-4"></div>
 
-                    <!-- Task List -->
-                    <div id="taskList" class="space-y-2 mb-4"></div>
+            <button onclick="window.print()" class="w-full p-2 bg-gray-500 text-white rounded">
+                Print PDF
+            </button>
+        </div>
 
-                    <!-- Custom Task -->
-                    <div class="flex gap-2 mb-4">
-                        <input type="text" id="customTask" placeholder="Task tambahan..." 
-                               class="flex-1 p-2 border rounded">
-                        <button onclick="addCustomTask()" 
-                                class="px-4 bg-green-500 text-white rounded">+</button>
-                    </div>
-
-                    <!-- Control Buttons -->
-                    <div class="space-y-2">
-                        <button onclick="deleteAllTasks()" 
-                                class="w-full p-2 bg-red-500 text-white rounded">
-                            Hapus Semua Task
-                        </button>
-                        <button onclick="window.print()" 
-                                class="w-full p-2 bg-gray-500 text-white rounded">
-                            Cetak PDF
-                        </button>
-                    </div>
+        <!-- Print Layout -->
+        <div class="print-only">
+            <h1 class="text-xl font-bold mb-4 text-center">Checklist Servis</h1>
+            <div id="printInfo" class="mb-4"></div>
+            <div id="printTasks"></div>
+            <div class="mt-8 flex justify-between">
+                <div class="text-center">
+                    <p>Mekanik</p>
+                    <div class="mt-16 border-t border-black w-32">(_____________)</div>
                 </div>
-            </div>
-
-            <!-- Print Version -->
-            <div class="print-view">
-                <h1 class="text-2xl text-center font-bold mb-6">Laporan Servis Berkala</h1>
-                <div id="printInfo" class="mb-6"></div>
-                <div id="printTasks"></div>
-                <div class="mt-16 flex justify-between">
-                    <div class="text-center">
-                        <p>Mekanik</p>
-                        <div class="mt-16 border-t border-black w-32">
-                            (_______________)
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p>Customer</p>
-                        <div class="mt-16 border-t border-black w-32">
-                            (_______________)
-                        </div>
-                    </div>
+                <div class="text-center">
+                    <p>Customer</p>
+                    <div class="mt-16 border-t border-black w-32">(_____________)</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let tasks = [];
-        let isLocked = false;
-
-        const taskList = {
-            preCheck: [
-                { task: 'Cek semua lampu (sein, rem, head lamp)' },
-                { task: 'Cek indikator warning di panel' },
-                { task: 'Cek kondisi steering gearbox' },
-                { task: 'Cek kondisi & fungsi wiper' },
-                { task: 'Cek ketinggian rem tangan' },
-                { task: 'Cek fungsi power window' },
-                { task: 'Cek fungsi spion elektrik' },
-                { task: 'Cek fungsi central lock' }
+        const tasks = {
+            precheck: [
+                'Cek lampu-lampu',
+                'Cek indikator',
+                'Cek power window',
+                'Cek wiper',
+                'Cek rem tangan'
             ],
             oil: [
-                { task: 'Isi oli mesin sesuai spesifikasi' },
-                { task: 'Torsi baut drain oli', spec: '25-30 Nm' },
-                { task: 'Torsi filter oli', spec: '15-17 Nm' }
+                'Ganti oli mesin',
+                'Torsi baut oli (25-30Nm)',
+                'Ganti filter oli'
             ],
             brake: [
-                { task: 'Torsi kaliper rem', spec: '35-40 Nm' },
-                { task: 'Bleeding rem' },
-                { task: 'Bersihkan rem' }
+                'Cek pad rem',
+                'Torsi kaliper (35-40Nm)',
+                'Bleeding rem'
             ],
             transmission: [
-                { task: 'Isi oli transmisi sesuai spesifikasi' },
-                { task: 'Torsi baut drain transmisi', spec: '30-35 Nm' }
+                'Cek oli transmisi',
+                'Torsi drain transmisi'
             ],
-            tuneUp: [
-                { task: 'Bersihkan throttle body' },
-                { task: 'Cek/ganti filter udara' },
-                { task: 'Cek idle speed' }
+            tuneup: [
+                'Bersihkan throttle',
+                'Cek filter udara',
+                'Setel idle'
             ],
             coolant: [
-                { task: 'Isi coolant sesuai spesifikasi' },
-                { task: 'Periksa tutup radiator' },
-                { task: 'Periksa kebocoran sistem pendingin' }
+                'Cek level coolant',
+                'Cek tutup radiator'
             ],
             wheel: [
-                { task: 'Torsi baut roda', spec: '80-100 Nm' },
-                { task: 'Cek kondisi ban' }
+                'Torsi roda (80-100Nm)',
+                'Cek kondisi ban'
             ],
-            sparkPlug: [
-                { task: 'Ganti busi', spec: '20-25 Nm' },
-                { task: 'Cek kondisi busi lama' }
+            sparkplug: [
+                'Ganti busi',
+                'Torsi busi (20-25Nm)'
             ]
         };
+
+        let checklist = [];
 
         function lockInfo() {
             if (!document.getElementById('plateNumber').value ||
                 !document.getElementById('carModel').value ||
-                !document.getElementById('kilometer').value ||
+                !document.getElementById('km').value ||
                 !document.getElementById('serviceType').value ||
-                !document.getElementById('serviceDate').value) {
-                alert('Mohon lengkapi semua data kendaraan');
+                !document.getElementById('date').value) {
+                alert('Mohon lengkapi semua data');
                 return;
             }
 
-            const inputs = ['plateNumber', 'carModel', 'kilometer', 'serviceType', 'serviceDate'];
-            inputs.forEach(id => document.getElementById(id).disabled = true);
-            
+            document.querySelectorAll('#infoSection input, #infoSection select').forEach(el => el.disabled = true);
             document.getElementById('lockBtn').style.display = 'none';
-            document.getElementById('serviceSection').classList.remove('hidden');
-            isLocked = true;
+            document.getElementById('taskSection').style.display = 'block';
+            updatePrintVersion();
         }
 
-        function addTasks(type) {
-            if (!isLocked) {
-                alert('Harap konfirmasi data kendaraan terlebih dahulu');
-                return;
-            }
-
-            taskList[type].forEach(item => {
-                if (!tasks.some(t => t.task === item.task)) {
-                    tasks.push({
-                        ...item,
-                        id: Date.now() + Math.random(),
-                        completed: false
-                    });
+        function addTask(type) {
+            tasks[type].forEach(task => {
+                if (!checklist.includes(task)) {
+                    checklist.push(task);
                 }
             });
             renderTasks();
         }
 
-        function addCustomTask() {
-            const input = document.getElementById('customTask');
-            const task = input.value.trim();
-            
-            if (task) {
-                tasks.push({
-                    id: Date.now(),
-                    task: task,
-                    completed: false
-                });
-                input.value = '';
-                renderTasks();
-            }
-        }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task && !task.completed) {
-                if (confirm('Tandai sebagai selesai? (Tidak dapat dibatalkan)')) {
-                    task.completed = true;
-                    task.completedTime = new Date().toLocaleTimeString();
-                    renderTasks();
-                }
-            }
-        }
-
-        function deleteTask(id) {
-            if (confirm('Hapus task ini?')) {
-                tasks = tasks.filter(t => t.id !== id);
-                renderTasks();
-            }
-        }
-
-        function deleteAllTasks() {
-            if (confirm('Hapus semua task?')) {
-                tasks = [];
-                renderTasks();
-            }
-        }
-
         function renderTasks() {
             const list = document.getElementById('taskList');
-            list.innerHTML = '';
-
-            tasks.forEach(task => {
-                const div = document.createElement('div');
-                div.className = `p-3 border rounded flex items-center gap-2 ${task.completed ? 'bg-green-50' : ''}`;
-                
-                div.innerHTML = `
-                    <input type="checkbox" 
-                        ${task.completed ? 'checked disabled' : ''} 
-                        onclick="toggleTask(${task.id})"
-                        class="w-4 h-4">
-                    <div class="flex-1">
-                        <span class="${task.completed ? 'line-through' : ''}">${task.task}</span>
-                        ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
-                        ${task.completed ? `
-                            <div class="text-sm text-green-600">
-                                Selesai: ${task.completedTime}
-                            </div>
-                        ` : ''}
-                    </div>
-                    <button onclick="deleteTask(${task.id})" 
-                            class="text-red-500 hover:text-red-700">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                
-                list.appendChild(div);
-            });
-
-            // Update print version
+            list.innerHTML = checklist.map((task, index) => `
+                <div class="flex items-center gap-2 p-2 border rounded mb-2">
+                    <input type="checkbox" onchange="updatePrintVersion()">
+                    <span>${task}</span>
+                </div>
+            `).join('');
             updatePrintVersion();
         }
 
         function updatePrintVersion() {
             // Info kendaraan
-            const printInfo = document.getElementById('printInfo');
-            printInfo.innerHTML = `
-                <table class="w-full border-collapse">
-                    <tr>
-                        <td class="border p-2 w-32">Nomor Polisi</td>
-                        <td class="border p-2">: ${document.getElementById('plateNumber').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Model</td>
-                        <td class="border p-2">: HONDA ${document.getElementById('carModel').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Kilometer</td>
-                        <td class="border p-2">: ${document.getElementById('kilometer').value} KM</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Jenis Servis</td>
-                        <td class="border p-2">: ${document.getElementById('serviceType').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Tanggal</td>
-                        <td class="border p-2">: ${document.getElementById('serviceDate').value}</td>
-                    </tr>
-                </table>
+            document.getElementById('printInfo').innerHTML = `
+                <div class="border p-4 mb-4">
+                    <p>Nomor Polisi: ${document.getElementById('plateNumber').value}</p>
+                    <p>Model: ${document.getElementById('carModel').value}</p>
+                    <p>Kilometer: ${document.getElementById('km').value}</p>
+                    <p>Jenis Servis: ${document.getElementById('serviceType').value}</p>
+                    <p>Tanggal: ${document.getElementById('date').value}</p>
+                </div>
             `;
 
-            // Task list
-            const printTasks = document.getElementById('printTasks');
-            if (tasks.length > 0) {
-                printTasks.innerHTML = `
-                    <table class="w-full border-collapse mt-4">
-                        <thead>
-                            <tr>
-                                <th class="border p-2">Task</th>
-                                <th class="border p-2 w-24">Status</th>
-                                <th class="border p-2">Spesifikasi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tasks.map(task => `
-                                <tr>
-                                    <td class="border p-2">${task.task}</td>
-                                    <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
-                                    <td class="border p-2">${task.spec || '-'}</td>
-                                </tr>
-                            `).join('')}
+            // Tasks
+            const boxes = document.querySelectorAll('#taskList input[type="checkbox"]');
+            document.getElementById('printTasks').innerHTML = `
+                <table class="w-full border-collapse">
+                    <tr>
+                        <th class="border p-2">Task</th>
+                        <th class="border p-2" style="width: 100px;">Status</th>
+                    </tr>
+                    ${checklist.map((task, i) => `
+                        <tr>
+                            <td class="border p-2">${task}</td>
+                            <td class="border p-2 text-center">
+                                ${boxes[i]?.checked ? '✓' : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>
