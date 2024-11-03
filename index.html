@@ -89,56 +89,9 @@
 
         <!-- Print Layout -->
         <div class="print-only">
-            <h1 class="text-2xl font-bold mb-4 text-center">Checklist Servis Mobil</h1>
-            <!-- Info Kendaraan -->
-            <div id="printInfo" class="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50">
-                <table class="w-full border-collapse mb-4 text-sm">
-                    <tr>
-                        <td class="border p-2 font-semibold">Nomor Polisi</td>
-                        <td class="border p-2">: ${document.getElementById('plateNumber').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2 font-semibold">Model Kendaraan</td>
-                        <td class="border p-2">: ${document.getElementById('carModel').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2 font-semibold">Kilometer</td>
-                        <td class="border p-2">: ${document.getElementById('km').value} KM</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2 font-semibold">Jenis Servis</td>
-                        <td class="border p-2">: ${document.getElementById('serviceType').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2 font-semibold">Tanggal</td>
-                        <td class="border p-2">: ${document.getElementById('date').value}</td>
-                    </tr>
-                </table>
-            </div>
-            
-            <!-- Tabel Tugas -->
-            <div id="printTasks" class="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50">
-                <table class="w-full border-collapse text-sm">
-                    <thead>
-                        <tr>
-                            <th class="border p-2 bg-gray-200 font-semibold">Task</th>
-                            <th class="border p-2 bg-gray-200 font-semibold">Status</th>
-                            <th class="border p-2 bg-gray-200 font-semibold">Spesifikasi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${checklist.map(task => `
-                            <tr class="${task.completed ? 'bg-green-50' : ''}">
-                                <td class="border p-2">${task.text}</td>
-                                <td class="border p-2 text-center">${task.completed ? '✓ Selesai' : 'Belum Selesai'}</td>
-                                <td class="border p-2">${task.spec || '-'}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Signature -->
+            <h1 class="text-xl font-bold mb-4 text-center">Checklist Servis</h1>
+            <div id="printInfo" class="mb-4"></div>
+            <div id="printTasks"></div>
             <div class="mt-8 flex justify-between">
                 <div class="text-center">
                     <p>Mekanik</p>
@@ -171,91 +124,189 @@
             ],
             brake: [
                 { text: 'Torsi kaliper rem', spec: '35-40 Nm' },
-                { text: 'Cek kondisi & ketebalan kampas rem depan/belakang' },
-                { text: 'Cek kondisi minyak rem' }
+                { text: 'Bleeding rem' },
+                { text: 'Bersihkan rem' }
             ],
             transmission: [
                 { text: 'Isi oli transmisi sesuai spesifikasi' },
                 { text: 'Torsi baut drain transmisi', spec: '30-35 Nm' }
             ],
             tuneup: [
-                { text: 'Cek kondisi filter udara' },
-                { text: 'Cek kondisi busi' },
-                { text: 'Cek idle speed' },
-                { text: 'Cek timing pengapian' }
+                { text: 'Bersihkan throttle body' },
+                { text: 'Cek/ganti filter udara' },
+                { text: 'Cek idle speed' }
             ],
             coolant: [
-                { text: 'Cek level & kualitas coolant' },
-                { text: 'Isi coolant sesuai spesifikasi' }
+                { text: 'Isi coolant sesuai spesifikasi' },
+                { text: 'Periksa tutup radiator' },
+                { text: 'Periksa kebocoran sistem pendingin' }
             ],
             wheel: [
-                { text: 'Cek tekanan ban' },
-                { text: 'Cek kondisi & ketebalan ban' },
-                { text: 'Rotasi ban jika perlu' }
+                { text: 'Torsi baut roda', spec: '80-100 Nm' },
+                { text: 'Cek kondisi ban' }
             ],
             sparkplug: [
-                { text: 'Ganti busi sesuai spesifikasi' },
-                { text: 'Torsi busi', spec: '20-25 Nm' }
+                { text: 'Ganti busi', spec: '20-25 Nm' },
+                { text: 'Cek kondisi busi lama' }
             ]
         };
 
         let checklist = [];
 
         function lockInfo() {
-            document.getElementById('infoSection').style.display = 'none';
+            if (!document.getElementById('plateNumber').value ||
+                !document.getElementById('carModel').value ||
+                !document.getElementById('km').value ||
+                !document.getElementById('serviceType').value ||
+                !document.getElementById('date').value) {
+                alert('Mohon lengkapi semua data');
+                return;
+            }
+
+            document.querySelectorAll('#infoSection input, #infoSection select').forEach(el => el.disabled = true);
+            document.getElementById('lockBtn').style.display = 'none';
             document.getElementById('taskSection').style.display = 'block';
+            updatePrintVersion();
         }
 
-        function addTask(category) {
-            checklist = checklist.concat(tasks[category].map(task => ({ ...task, completed: false })));
+        function addTask(type) {
+            tasks[type].forEach(task => {
+                if (!checklist.some(t => t.text === task.text)) {
+                    checklist.push({
+                        id: Date.now() + Math.random(),
+                        ...task,
+                        completed: false
+                    });
+                }
+            });
             renderTasks();
         }
 
         function addCustomTask() {
-            const customTask = document.getElementById('customTask').value.trim();
-            if (customTask) {
-                checklist.push({ text: customTask, completed: false });
+            const input = document.getElementById('customTask');
+            const text = input.value.trim();
+            if (text) {
+                checklist.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+                input.value = '';
                 renderTasks();
-                document.getElementById('customTask').value = '';
             }
         }
 
-        function toggleTask(index) {
-            checklist[index].completed = !checklist[index].completed;
-            renderTasks();
+        function toggleTask(id) {
+            const task = checklist.find(t => t.id === id);
+            if (task && !task.completed) {
+                if (confirm('Tandai task sebagai selesai? (Tidak dapat dibatalkan)')) {
+                    task.completed = true;
+                    task.completedTime = new Date().toLocaleTimeString();
+                    renderTasks();
+                }
+            }
+        }
+
+        function deleteTask(id) {
+            const task = checklist.find(t => t.id === id);
+            if (task.completed) {
+                if (confirm('Task ini sudah selesai. Yakin ingin menghapus?')) {
+                    checklist = checklist.filter(t => t.id !== id);
+                    renderTasks();
+                }
+            } else {
+                if (confirm('Hapus task ini?')) {
+                    checklist = checklist.filter(t => t.id !== id);
+                    renderTasks();
+                }
+            }
         }
 
         function deleteAllTasks() {
-            if (confirm("Apakah Anda yakin ingin menghapus semua tugas?")) {
-                checklist = [];
-                renderTasks();
+            const completedCount = checklist.filter(t => t.completed).length;
+            if (completedCount > 0) {
+                if (confirm(`Terdapat ${completedCount} task yang sudah selesai. Yakin hapus semua?`)) {
+                    checklist = [];
+                    renderTasks();
+                }
+            } else {
+                if (confirm('Hapus semua task?')) {
+                    checklist = [];
+                    renderTasks();
+                }
             }
         }
 
         function renderTasks() {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            checklist.forEach((task, index) => {
-                const taskElement = document.createElement('div');
-                taskElement.className = `p-2 border rounded ${task.completed ? 'completed' : ''}`;
-                taskElement.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <input type="checkbox" onclick="toggleTask(${index})" ${task.completed ? 'checked' : ''} class="mr-2">
-                            <span>${task.text}</span>
-                            ${task.spec ? `<span class="text-xs text-gray-500">(${task.spec})</span>` : ''}
-                        </div>
-                        <button onclick="removeTask(${index})" class="text-red-500"><i class="fas fa-trash-alt"></i></button>
+            const list = document.getElementById('taskList');
+            list.innerHTML = checklist.map(task => `
+                <div class="flex items-center gap-2 p-2 border rounded ${task.completed ? 'completed' : ''}">
+                    <input type="checkbox" 
+                           ${task.completed ? 'checked disabled' : ''} 
+                           onchange="toggleTask(${task.id})"
+                           class="w-4 h-4">
+                    <div class="flex-1">
+                        <span class="${task.completed ? 'line-through' : ''}">${task.text}</span>
+                        ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
+                        ${task.completed ? `
+                            <div class="text-sm text-green-600">Selesai: ${task.completedTime}</div>
+                        ` : ''}
                     </div>
-                `;
-                taskList.appendChild(taskElement);
-            });
+                    <button onclick="deleteTask(${task.id})" 
+                            class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+            updatePrintVersion();
         }
 
-        function removeTask(index) {
-            checklist.splice(index, 1);
-            renderTasks();
+        function updatePrintVersion() {
+            document.getElementById('printInfo').innerHTML = `
+                <table class="w-full border-collapse mb-4">
+                    <tr>
+                        <td class="border p-2 w-32">Nomor Polisi</td>
+                        <td class="border p-2">: ${document.getElementById('plateNumber').value}</td>
+                    </tr>
+                    <tr>
+                        <td class="border p-2">Model</td>
+                        <td class="border p-2">: ${document.getElementById('carModel').value}</td>
+                    </tr>
+                    <tr>
+                        <td class="border p-2">Kilometer</td>
+                        <td class="border p-2">: ${document.getElementById('km').value} KM</td>
+                    </tr>
+                    <tr>
+                        <td class="border p-2">Jenis Servis</td>
+                        <td class="border p-2">: ${document.getElementById('serviceType').value}</td>
+                    </tr>
+                    <tr>
+                        <td class="border p-2">Tanggal</td>
+                        <td class="border p-2">: ${document.getElementById('date').value}</td>
+                    </tr>
+                </table>
+            `;
+
+            document.getElementById('printTasks').innerHTML = `
+                <table class="w-full border-collapse">
+                    <tr>
+                        <th class="border p-2">Task</th>
+                        <th class="border p-2" style="width: 100px;">Status</th>
+                        <th class="border p-2" style="width: 120px;">Spesifikasi</th>
+                    </tr>
+                    ${checklist.map(task => `
+                        <tr>
+                            <td class="border p-2">${task.text}</td>
+                            <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
+                            <td class="border p-2">${task.spec || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
         }
+
+        // Set default date
+        document.getElementById('date').valueAsDate = new Date();
     </script>
 </body>
 </html>
