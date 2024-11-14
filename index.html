@@ -28,6 +28,15 @@
     <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
       <!-- Vehicle Info -->
       <div class="mb-6" id="infoSection">
+        <select id="mechanic" class="w-full p-2 mb-2 border rounded">
+          <option value="">Pilih Mekanik</option>
+          <option>Alvin</option>
+          <option>Farhan</option>
+          <option>Agung</option>
+          <option>Fatih</option>
+          <option>Riski</option>
+        </select>
+
         <input id="plateNumber" placeholder="Nomor Polisi" class="w-full p-2 mb-2 border rounded uppercase" />
 
         <select id="carModel" class="w-full p-2 mb-2 border rounded">
@@ -71,18 +80,20 @@
 
       <!-- Tasks Section -->
       <div id="taskSection" style="display: none">
-        <div class="grid grid-cols-2 gap-2 mb-4">
-          <button onclick="addTask('precheck')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Pre-Check</button>
-          <button onclick="addTask('oil')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Oli</button>
-          <button onclick="addTask('brake')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Rem</button>
-          <button onclick="addTask('transmission')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Transmisi</button>
-          <button onclick="addTask('tuneup')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Tune Up</button>
-          <button onclick="addTask('coolant')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Coolant</button>
-          <button onclick="addTask('wheel')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Roda</button>
-          <button onclick="addTask('sparkplug')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Busi</button>
+        <div id="addTaskBtn" class="grid grid-cols-2 gap-2 mb-4">
+          <button onclick="addTask('precheck')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Pre-check</button>
+          <button onclick="addTask('oliMesin')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Oli Mesin</button>
+          <button onclick="addTask('oliTransmisi')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Oli Transmisi</button>
+          <button onclick="addTask('servisRem')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Servis Rem</button>
+          <button onclick="addTask('tuneUp')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Tune Up</button>
+          <button onclick="addTask('kurasCoolant')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Kuras Coolant</button>
+          <button onclick="addTask('torsiRoda')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Torsi Roda</button>
+          <button onclick="addTask('servisPengapian')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Servis Pengapian</button>
+          <button onclick="addTask('filterBensin')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Filter Bensin</button>
+          <button onclick="addTask('finalCheckUp')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Final Check Up</button>
         </div>
 
-        <div class="flex gap-2 mb-4">
+        <div id="taskTambahanSection" class="flex gap-2 mb-4">
           <input id="customTask" placeholder="Task tambahan..." class="flex-1 p-2 border rounded" />
           <button onclick="addCustomTask()" class="px-4 bg-green-500 text-white rounded hover:bg-green-600">+</button>
         </div>
@@ -90,25 +101,9 @@
         <div id="taskList" class="mb-4 space-y-2"></div>
 
         <div class="space-y-2">
-          <button onclick="deleteAllTasks()" class="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600">Hapus Semua Task</button>
-          <button onclick="window.print()" class="w-full p-2 bg-gray-500 text-white rounded hover:bg-gray-600">Print PDF</button>
-        </div>
-      </div>
-
-      <!-- Print Layout -->
-      <div class="print-only">
-        <h1 class="text-xl font-bold mb-4 text-center">Checklist Servis</h1>
-        <div id="printInfo" class="mb-4"></div>
-        <div id="printTasks"></div>
-        <div class="mt-8 flex justify-between">
-          <div class="text-center">
-            <p>Mekanik</p>
-            <div class="mt-16 border-t border-black w-32">(_____________)</div>
-          </div>
-          <div class="text-center">
-            <p>Customer</p>
-            <div class="mt-16 border-t border-black w-32">(_____________)</div>
-          </div>
+          <button onclick="deleteAllTasks()" class="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600" id="deleteAllBtn">Hapus Semua Task</button>
+          <button onclick="confirmTask()" class="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600" id="confirmTaskBtn">Konfirmasi Task Selesai</button>
+          <button onclick="window.print()" class="w-full p-2 bg-gray-500 text-white rounded hover:bg-gray-600 no-print" id="confirmTaskBtn">Print PDF</button>
         </div>
       </div>
     </div>
@@ -116,22 +111,31 @@
     <script>
       const tasks = {
         precheck: [
-          { text: 'Cek semua lampu (sein, rem, head lamp)' },
-          { text: 'Cek indikator warning di panel' },
-          { text: 'Cek kondisi steering gearbox' },
-          { text: 'Cek kondisi & fungsi wiper' },
-          { text: 'Cek ketinggian rem tangan' },
-          { text: 'Cek fungsi power window' },
-          { text: 'Cek fungsi spion elektrik' },
-          { text: 'Cek fungsi central lock' },
+          { text: 'Cek lampu indikator' },
+          { text: 'Cek karet dan arah wiper' },
+          { text: 'Cek klakson' },
+          { text: 'Cek lampu interior' },
+          { text: 'Cek A/C' },
+          { text: 'Cek ketinggian rem' },
+          { text: 'Cek lampu eksterior' },
+          { text: 'Cek terminal aki' },
+          { text: 'Cek kebocoran atas (cover valve, master booster, radiator)' },
+          { text: 'Cek V-belt' },
+          { text: 'Cek rack steer' },
+          { text: 'Cek power window' },
+          { text: 'Cek spion' },
+          { text: 'Cek central lock' },
+          { text: 'Cek filter ac' },
         ],
-        oil: [{ text: 'Isi oli mesin sesuai spesifikasi' }, { text: 'Torsi baut drain oli', spec: '25-30 Nm' }, { text: 'Torsi filter oli', spec: '15-17 Nm' }],
-        brake: [{ text: 'Torsi kaliper rem', spec: '35-40 Nm' }, { text: 'Bleeding rem' }, { text: 'Bersihkan rem' }],
-        transmission: [{ text: 'Isi oli transmisi sesuai spesifikasi' }, { text: 'Torsi baut drain transmisi', spec: '30-35 Nm' }],
-        tuneup: [{ text: 'Bersihkan throttle body' }, { text: 'Cek/ganti filter udara' }, { text: 'Cek idle speed' }],
-        coolant: [{ text: 'Isi coolant sesuai spesifikasi' }, { text: 'Periksa tutup radiator' }, { text: 'Periksa kebocoran sistem pendingin' }],
-        wheel: [{ text: 'Torsi baut roda', spec: '80-100 Nm' }, { text: 'Cek kondisi ban' }],
-        sparkplug: [{ text: 'Ganti busi', spec: '20-25 Nm' }, { text: 'Cek kondisi busi lama' }],
+        oliMesin: [{ text: 'Torsi baut pembuangan oli mesin' }, { text: 'Torsi filter oli mesin' }, { text: 'Isi oli mesin sesuai spesifikasi' }, { text: 'Cek kebocoran' }],
+        oliTransmisi: [{ text: 'Torsi baut pembuangan oli transmisi' }, { text: 'Isi oli transmisi sesuai spesifikasi' }],
+        servisRem: [{ text: 'Bersihkan rem' }, { text: 'Torsi Kaliper' }, { text: 'Cek komponen sistem rem' }, { text: 'Bleeding Rem' }],
+        tuneUp: [{ text: 'Bersihkan Throttle Body' }, { text: 'Cek filter udara' }],
+        kurasCoolant: [{ text: 'Cek tutup pembuangan air radiator' }, { text: 'Kuras coolant' }, { text: 'Isi coolant sesuai spesifikasi' }],
+        torsiRoda: [{ text: 'Torsi mur roda sesuai spesifikasi' }],
+        servisPengapian: [{ text: 'Ganti Busi' }],
+        filterBensin: [{ text: 'Ganti Filter bensin' }, { text: 'Recall Fuel pump' }],
+        finalCheckUp: [{ text: 'Cek Kondisi ban' }, { text: 'Cek kaki-kaki' }, { text: 'Cek Angin2 ban + serep' }, { text: 'Cek Fluida' }, { text: 'Cek Motor Fan' }, { text: 'Cek pintu (Lumasi engsel)' }, { text: 'Cek level dipstick' }],
       };
 
       let checklist = [];
@@ -145,7 +149,6 @@
         document.querySelectorAll('#infoSection input, #infoSection select').forEach((el) => (el.disabled = true));
         document.getElementById('lockBtn').style.display = 'none';
         document.getElementById('taskSection').style.display = 'block';
-        updatePrintVersion();
       }
 
       function addTask(type) {
@@ -155,6 +158,7 @@
               id: Date.now() + Math.random(),
               ...task,
               completed: false,
+              category: type,
             });
           }
         });
@@ -169,6 +173,7 @@
             id: Date.now(),
             text: text,
             completed: false,
+            category: 'Tambahan',
           });
           input.value = '';
           renderTasks();
@@ -179,9 +184,12 @@
         const task = checklist.find((t) => t.id === id);
         if (task && !task.completed) {
           if (confirm('Tandai task sebagai selesai? (Tidak dapat dibatalkan)')) {
+            document.getElementById(id).checked = true;
             task.completed = true;
             task.completedTime = new Date().toLocaleTimeString();
             renderTasks();
+          } else {
+            document.getElementById(id).checked = false;
           }
         }
       }
@@ -216,84 +224,105 @@
         }
       }
 
-      function renderTasks() {
-        const list = document.getElementById('taskList');
-        list.innerHTML = checklist
-          .map(
-            (task) => `
-                <div class="flex items-center gap-2 p-2 border rounded ${task.completed ? 'completed' : ''}">
-                    <input type="checkbox" 
-                           ${task.completed ? 'checked disabled' : ''} 
-                           onchange="toggleTask(${task.id})"
-                           class="w-4 h-4">
-                    <div class="flex-1">
-                        <span class="${task.completed ? 'line-through' : ''}">${task.text}</span>
-                        ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
-                        ${
-                          task.completed
-                            ? `
-                            <div class="text-sm text-green-600">Selesai: ${task.completedTime}</div>
-                        `
-                            : ''
-                        }
-                    </div>
-                    <button onclick="deleteTask(${task.id})" 
-                            class="text-red-500 hover:text-red-700">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `
-          )
-          .join('');
-        updatePrintVersion();
+      function confirmTask() {
+        const unCompletedCount = checklist.filter((t) => !t.completed).length;
+
+        if (checklist.length === 0) {
+          alert('Belum ada task');
+          return;
+        }
+
+        const hideElements = () => {
+          // Sembunyikan tombol-tombol
+          ['addTaskBtn', 'deleteAllBtn', 'confirmTaskBtn'].forEach((id) => {
+            document.getElementById(id).style.display = 'none';
+          });
+
+          // Disable semua input dan sembunyikan tombol delete
+          document.querySelectorAll('#eachTask input').forEach((el) => (el.disabled = true));
+          document.querySelectorAll('#deleteTaskBtn').forEach((btn) => (btn.style.display = 'none'));
+
+          // Sembunyikan section tambahan
+          document.getElementById('taskTambahanSection').style.display = 'none';
+        };
+
+        if (unCompletedCount > 0) {
+          if (confirm(`Terdapat ${unCompletedCount} task yang belum selesai. Yakin selesaikan servis?`)) {
+            hideElements();
+          }
+        } else {
+          alert('Semua task sudah selesai');
+          hideElements();
+        }
       }
 
-      function updatePrintVersion() {
-        document.getElementById('printInfo').innerHTML = `
-                <table class="w-full border-collapse mb-4">
-                    <tr>
-                        <td class="border p-2 w-32">Nomor Polisi</td>
-                        <td class="border p-2">: ${document.getElementById('plateNumber').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Model</td>
-                        <td class="border p-2">: ${document.getElementById('carModel').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Kilometer</td>
-                        <td class="border p-2">: ${document.getElementById('km').value} KM</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Jenis Servis</td>
-                        <td class="border p-2">: ${document.getElementById('serviceType').value}</td>
-                    </tr>
-                    <tr>
-                        <td class="border p-2">Tanggal</td>
-                        <td class="border p-2">: ${document.getElementById('date').value}</td>
-                    </tr>
-                </table>
-            `;
+      function renderTasks() {
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
 
-        document.getElementById('printTasks').innerHTML = `
-                <table class="w-full border-collapse">
-                    <tr>
-                        <th class="border p-2">Task</th>
-                        <th class="border p-2" style="width: 100px;">Status</th>
-                        <th class="border p-2" style="width: 120px;">Spesifikasi</th>
-                    </tr>
-                    ${checklist
-                      .map(
-                        (task) => `
-                        <tr>
-                            <td class="border p-2">${task.text}</td>
-                            <td class="border p-2 text-center">${task.completed ? '✓' : ''}</td>
-                            <td class="border p-2">${task.spec || '-'}</td>
-                        </tr>
-                    `
-                      )
-                      .join('')}
-                </table>
-            `;
+        // Kelompokkan task berdasarkan kategori
+        const tasksByCategory = {};
+        checklist.forEach((task) => {
+          if (!tasksByCategory[task.category]) {
+            tasksByCategory[task.category] = [];
+          }
+          tasksByCategory[task.category].push(task);
+        });
+
+        // Render tasks berdasarkan kategori
+        Object.entries(tasksByCategory).forEach(([category, categoryTasks]) => {
+          // Tambahkan header kategori
+          const categoryHeader = document.createElement('div');
+          categoryHeader.className = 'font-bold text-lg mt-4 mb-2 text-black bg-gray-100 p-2 rounded';
+
+          // Mapping nama kategori yang lebih user-friendly
+          const categoryNames = {
+            precheck: 'Pre-check',
+            oliMesin: 'Oli Mesin',
+            oliTransmisi: 'Oli Transmisi',
+            servisRem: 'Servis Rem',
+            tuneUp: 'Tune Up',
+            kurasCoolant: 'Kuras Coolant',
+            torsiRoda: 'Torsi Roda',
+            servisPengapian: 'Servis Pengapian',
+            filterBensin: 'Filter Bensin',
+            finalCheckUp: 'Final Check Up',
+            Tambahan: 'Task Tambahan',
+          };
+
+          categoryHeader.textContent = categoryNames[category] || category;
+          list.appendChild(categoryHeader);
+
+          // Render tasks untuk kategori ini
+          categoryTasks.forEach((task) => {
+            const taskElement = document.createElement('div');
+            taskElement.innerHTML = `
+                    <div id="eachTask" class="flex items-center gap-2 p-2 border rounded ${task.completed ? 'completed' : ''}">
+                        <input type="checkbox"
+                               ${task.completed ? 'checked disabled' : ''}
+                               id="${task.id}"
+                               onchange="toggleTask(${task.id})"
+                               class="w-4 h-4">
+                        <div class="flex-1">
+                            <span class="${task.completed ? 'line-through' : ''}">${task.text}</span>
+                            ${task.spec ? `<span class="text-sm text-blue-600 ml-2">(${task.spec})</span>` : ''}
+                            ${
+                              task.completed
+                                ? `
+                                <div class="text-sm text-green-600">Selesai: ${task.completedTime}</div>
+                            `
+                                : ''
+                            }
+                        </div>
+                        <button id="deleteTaskBtn" onclick="deleteTask(${task.id})"
+                                class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            list.appendChild(taskElement);
+          });
+        });
       }
 
       // Set default date
