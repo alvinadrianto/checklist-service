@@ -91,8 +91,6 @@
           <button onclick="addTask('tuneUp')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Tune Up</button>
           <button onclick="addTask('kurasCoolant')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Kuras Coolant</button>
           <button onclick="addTask('torsiRoda')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Torsi Roda</button>
-          <button onclick="addTask('servisPengapian')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Servis Pengapian</button>
-          <button onclick="addTask('filterBensin')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Filter Bensin</button>
           <button onclick="addTask('finalCheckUp')" class="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">+ Final Check Up</button>
         </div>
 
@@ -160,11 +158,9 @@
         oliMesin: [{ text: 'Torsi baut pembuangan oli mesin' }, { text: 'Torsi filter oli mesin' }, { text: 'Isi oli mesin sesuai spesifikasi' }, { text: 'Cek kebocoran (note: seal filter oli)' }],
         oliTransmisi: [{ text: 'Torsi baut pembuangan oli transmisi' }, { text: 'Isi oli transmisi sesuai spesifikasi' }],
         servisRem: [{ text: 'Bersihkan rem' }, { text: 'Torsi Kaliper' }, { text: 'Cek komponen sistem rem' }, { text: 'Bleeding Rem' }],
-        tuneUp: [{ text: 'Bersihkan Throttle Body' }, { text: 'Cek filter udara' }],
+        tuneUp: [{ text: 'Bersihkan Throttle Body' }, { text: 'Cek filter udara' }, { text: 'Ganti Filter bensin' }, { text: 'Recall Fuel pump' }, { text: 'Ganti Busi' }],
         kurasCoolant: [{ text: 'Cek tutup pembuangan air radiator' }, { text: 'Kuras coolant' }, { text: 'Isi coolant sesuai spesifikasi' }],
         torsiRoda: [{ text: 'Torsi mur roda sesuai spesifikasi' }],
-        servisPengapian: [{ text: 'Ganti Busi' }],
-        filterBensin: [{ text: 'Ganti Filter bensin' }, { text: 'Recall Fuel pump' }],
         finalCheckUp: [{ text: 'Cek Kondisi ban' }, { text: 'Cek kaki-kaki' }, { text: 'Cek Angin2 ban + serep' }, { text: 'Cek Fluida' }, { text: 'Cek Motor Fan' }, { text: 'Cek pintu (Lumasi engsel)' }, { text: 'Cek level dipstick' }],
       };
 
@@ -398,8 +394,6 @@
             tuneUp: 'Tune Up',
             kurasCoolant: 'Kuras Coolant',
             torsiRoda: 'Torsi Roda',
-            servisPengapian: 'Servis Pengapian',
-            filterBensin: 'Filter Bensin',
             finalCheckUp: 'Final Check Up',
             Tambahan: 'Task Tambahan',
           };
